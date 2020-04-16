@@ -76,31 +76,29 @@ function save(){
 */
 function majority(channel,majorityPercent) {
 	// title : count
-	var games = {};
-	// after sorting, this is the most played game title
-	var majorityName = "";
-	// after sorting, this is how many users are playing it 
-	var majorityNumber = 0;
-	// Number of non-bot users
-	var validUserCount = 0;
+	var games = [];
 
 	channel.members.forEach(function(member) {
 		if(!member.user.bot) { // ignore bots			
 			if(member.presence.activities.length > 0){
 				var gameName = member.presence.activities[member.presence.activities.length-1].toString();
-				if(gameName && !noFlyList.includes(gameName)) {
-					validUserCount++; // Only include users who have a valid status
-					games[gameName] = ((games[gameName] || 0) + 1);
-					if(games[gameName] > majorityNumber) {
-						majorityName = gameName;
-						majorityNumber = games[gameName];
+				if(gameName && !noFlyList.includes(gameName)) {	
+					var newGame = { Name: gameName, Amount: 1 };
+					var foundIndex = games.findIndex(a => a.Name == newGame.Name);				
+					if(foundIndex < 0)
+					{
+						games.push(newGame); // Not Found so add
+					}
+					else{
+						games[foundIndex].Amount++;
 					}
 				}
 			}
 		}
 	})
-	if((majorityNumber / (validUserCount || 1)) >= majorityPercent){ // if we have a majority over or equal to the threshold
-		return(majorityName);
+
+	if(games.length > 0){ // if we have a majority over or equal to the threshold
+		return games.reduce((a,b)=> a.Amount > b.Amount ? a:b, 0).Name;
 	}else{
 		return;
 	}
