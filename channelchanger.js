@@ -82,14 +82,14 @@ function majority(channel,majorityPercent) {
 	// after sorting, this is how many users are playing it 
 	var majorityNumber = 0;
 	// Number of non-bot users
-	var userCount = 0;
+	var validUserCount = 0;
 
 	channel.members.forEach(function(member) {
-		if(!member.user.bot) { // ignore bots
-			userCount++;
+		if(!member.user.bot) { // ignore bots			
 			if(member.presence.activities.length > 0){
 				var gameName = member.presence.activities[member.presence.activities.length-1].toString();
-				if(gameName) {
+				if(gameName && !noFlyList.includes(gameName)) {
+					validUserCount++; // Only include users who have a valid status
 					games[gameName] = ((games[gameName] || 0) + 1);
 					if(games[gameName] > majorityNumber) {
 						majorityName = gameName;
@@ -99,7 +99,7 @@ function majority(channel,majorityPercent) {
 			}
 		}
 	})
-	if((majorityNumber / userCount) > majorityPercent){ // if we have a majority over the threshold
+	if((majorityNumber / (validUserCount || 1)) >= majorityPercent){ // if we have a majority over or equal to the threshold
 		return(majorityName);
 	}else{
 		return;
