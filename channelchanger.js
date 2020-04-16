@@ -77,9 +77,11 @@ function save(){
 function majority(channel,majorityPercent) {
 	// title : count
 	var games = [];
+	var userCount = 0;
 
 	channel.members.forEach(function(member) {
 		if(!member.user.bot) { // ignore bots			
+			userCount++;
 			if(member.presence.activities.length > 0){
 				var gameName = member.presence.activities[member.presence.activities.length-1].toString();
 				if(gameName && !noFlyList.includes(gameName)) {	
@@ -98,7 +100,12 @@ function majority(channel,majorityPercent) {
 	})
 
 	if(games.length > 0){ // if we have a majority over or equal to the threshold
-		return games.reduce((a,b)=> a.Amount > b.Amount ? a:b, 0).Name;
+		var topPlayed = games.reduce((a,b)=> a.Amount > b.Amount ? a:b, 0);
+		
+		if(userCount != topPlayed.Amount)
+			topPlayed.Name += ' - (' + topPlayed.Amount + '/' + userCount + ')';
+
+		return topPlayed.Name;
 	}else{
 		return;
 	}
